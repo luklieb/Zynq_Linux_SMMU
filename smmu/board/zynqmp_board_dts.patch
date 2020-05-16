@@ -1,0 +1,118 @@
+diff --git a/arch/arm64/boot/dts/xilinx/zynqmp-zcu100-revC.dts b/arch/arm64/boot/dts/xilinx/zynqmp-zcu100-revC.dts
+index e0590d2..50af072 100644
+--- a/arch/arm64/boot/dts/xilinx/zynqmp-zcu100-revC.dts
++++ b/arch/arm64/boot/dts/xilinx/zynqmp-zcu100-revC.dts
+@@ -491,12 +491,12 @@
+ 	vqmmc-supply = <&wmmcsdio_fixed>;
+ 	#address-cells = <1>;
+ 	#size-cells = <0>;
+-	wlcore: wifi@2 {
+-		compatible = "ti,wl1831";
+-		reg = <2>;
+-		interrupt-parent = <&gpio>;
+-		interrupts = <76 IRQ_TYPE_EDGE_RISING>; /* MIO76 WLAN_IRQ 1V8 */
+-	};
++	//wlcore: wifi@2 {
++	//	compatible = "ti,wl1831";
++	//	reg = <2>;
++	//	interrupt-parent = <&gpio>;
++	//	interrupts = <76 IRQ_TYPE_EDGE_RISING>; /* MIO76 WLAN_IRQ 1V8 */
++	//};
+ };
+ 
+ &serdes {
+@@ -523,10 +523,10 @@
+ 	status = "okay";
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&pinctrl_uart0_default>;
+-	bluetooth {
++	/*bluetooth {
+ 		compatible = "ti,wl1831-st";
+ 		enable-gpios = <&gpio 8 GPIO_ACTIVE_HIGH>;
+-	};
++	};*/
+ };
+ 
+ &uart1 {
+@@ -539,31 +539,33 @@
+ /* ULPI SMSC USB3320 */
+ &usb0 {
+ 	status = "okay";
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_usb0_default>;
++	//pinctrl-names = "default";
++	//pinctrl-0 = <&pinctrl_usb0_default>;
++	xlnx,usb-reset = <0x02faf080>;
+ };
+ 
+ &dwc3_0 {
+ 	status = "okay";
+-	dr_mode = "peripheral";
+-	phy-names = "usb3-phy";
+-	phys = <&lane2 PHY_TYPE_USB3 0 0 26000000>;
+-	maximum-speed = "super-speed";
++	//dr_mode = "peripheral";
++	//phy-names = "usb3-phy";
++	//phys = <&lane2 PHY_TYPE_USB3 0 0 26000000>;
++	//maximum-speed = "super-speed";
+ };
+ 
+ /* ULPI SMSC USB3320 */
+ &usb1 {
+ 	status = "okay";
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&pinctrl_usb1_default>;
++	//pinctrl-names = "default";
++	//pinctrl-0 = <&pinctrl_usb1_default>;
++	xlnx,usb-reset = <0x00000005>;
+ };
+ 
+ &dwc3_1 {
+ 	status = "okay";
+ 	dr_mode = "host";
+-	phy-names = "usb3-phy";
+-	phys = <&lane3 PHY_TYPE_USB3 1 0 26000000>;
+-	maximum-speed = "super-speed";
++	//phy-names = "usb3-phy";
++	//phys = <&lane3 PHY_TYPE_USB3 1 0 26000000>;
++	//maximum-speed = "super-speed";
+ };
+ 
+ &watchdog0 {
+@@ -571,30 +573,30 @@
+ };
+ 
+ &zynqmp_dpsub {
+-	status = "okay";
++	status = "disabled";
+ 	phy-names = "dp-phy0", "dp-phy1";
+ 	phys = <&lane1 PHY_TYPE_DP 0 1 27000000>,
+ 	       <&lane0 PHY_TYPE_DP 1 1 27000000>;
+ };
+ 
+ &zynqmp_dp_snd_pcm0 {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &zynqmp_dp_snd_pcm1 {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &zynqmp_dp_snd_card0 {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &zynqmp_dp_snd_codec0 {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &xlnx_dpdma {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &xilinx_ams {

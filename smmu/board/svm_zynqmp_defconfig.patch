@@ -1,0 +1,27 @@
+diff --git a/arch/arm64/configs/xilinx_zynqmp_defconfig b/arch/arm64/configs/xilinx_zynqmp_defconfig
+index dcf9d08..ce79a62 100644
+--- a/arch/arm64/configs/xilinx_zynqmp_defconfig
++++ b/arch/arm64/configs/xilinx_zynqmp_defconfig
+@@ -331,7 +331,8 @@ CONFIG_COMMON_CLK_SI570=y
+ CONFIG_COMMON_CLK_SI5324=y
+ # CONFIG_COMMON_CLK_XGENE is not set
+ CONFIG_COMMON_CLK_ZYNQMP=y
+-CONFIG_ARM_SMMU=y
++# CONFIG_ARM_SMMU is not set
++CONFIG_ARM_SMMU_SVM=y
+ CONFIG_REMOTEPROC=y
+ CONFIG_ZYNQMP_R5_REMOTEPROC=m
+ CONFIG_XILINX_VCU=m
+@@ -348,6 +349,7 @@ CONFIG_FPGA_MGR_ZYNQMP_FPGA=y
+ CONFIG_FPGA_BRIDGE=y
+ CONFIG_XILINX_PR_DECOUPLER=y
+ CONFIG_FPGA_REGION=y
++CONFIG_OF_FPGA_REGION=y
+ CONFIG_EXT2_FS=y
+ CONFIG_EXT3_FS=y
+ CONFIG_EXT4_FS_POSIX_ACL=y
+@@ -387,3 +389,4 @@ CONFIG_XLNX_CTRL_FRMBUF=y
+ CONFIG_XLNX_CTRL_VPSS=y
+ # CONFIG_SCHED_DEBUG is not set
+ # CONFIG_FTRACE is not set
++CONFIG_DEBUG_KERNEL=n

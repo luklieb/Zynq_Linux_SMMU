@@ -1,0 +1,5 @@
+all:
+{
+	[destination_device = pl] dma_multiple.bit
+}
+

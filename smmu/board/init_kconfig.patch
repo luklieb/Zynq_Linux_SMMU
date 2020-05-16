@@ -1,0 +1,13 @@
+diff --git a/init/Kconfig b/init/Kconfig
+index 1e234e2..3cb0e20 100644
+--- a/init/Kconfig
++++ b/init/Kconfig
+@@ -1150,7 +1150,7 @@ config BPF
+ menuconfig EXPERT
+ 	bool "Configure standard kernel features (expert users)"
+ 	# Unhide debug options, to make the on-by-default options visible
+-	select DEBUG_KERNEL
++	#select DEBUG_KERNEL
+ 	help
+ 	  This option allows certain base kernel options and settings
+           to be disabled or tweaked. This is for specialized

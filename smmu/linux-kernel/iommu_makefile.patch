@@ -1,0 +1,10 @@
+--- ../../linux-xlnx-v2018.2-zynqmp-fpga/drivers/iommu/Makefile	2018-10-09 15:59:25.878561215 +0200
++++ Makefile	2019-02-04 15:43:59.230673240 +0100
+@@ -12,6 +12,7 @@
+ obj-$(CONFIG_AMD_IOMMU) += amd_iommu.o amd_iommu_init.o
+ obj-$(CONFIG_AMD_IOMMU_V2) += amd_iommu_v2.o
+ obj-$(CONFIG_ARM_SMMU) += arm-smmu.o
++obj-$(CONFIG_ARM_SMMU_SVM) += hsa-smmu.o
+ obj-$(CONFIG_ARM_SMMU_V3) += arm-smmu-v3.o
+ obj-$(CONFIG_DMAR_TABLE) += dmar.o
+ obj-$(CONFIG_INTEL_IOMMU) += intel-iommu.o

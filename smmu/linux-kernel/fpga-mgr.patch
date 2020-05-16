@@ -1,0 +1,14 @@
+diff --git a/drivers/fpga/fpga-mgr.c b/drivers/fpga/fpga-mgr.c
+index a18cec5..945d536 100644
+--- a/drivers/fpga/fpga-mgr.c
++++ b/drivers/fpga/fpga-mgr.c
+@@ -731,8 +731,7 @@ struct fpga_manager *fpga_mgr_create(struct device *dev, const char *name,
+ 	int id, ret;
+ 
+ 	if (!mops || !mops->write_complete || !mops->state ||
+-	    !mops->write_init || (!mops->write && !mops->write_sg) ||
+-	    (mops->write && mops->write_sg)) {
++	    !mops->write_init || (!mops->write && !mops->write_sg)) {
+ 		dev_err(dev, "Attempt to register without fpga_manager_ops\n");
+ 		return NULL;
+ 	}

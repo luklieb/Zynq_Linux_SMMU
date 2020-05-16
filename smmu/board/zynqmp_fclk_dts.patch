@@ -1,0 +1,13 @@
+diff --git a/arch/arm64/boot/dts/xilinx/zynqmp-clk-ccf.dtsi b/arch/arm64/boot/dts/xilinx/zynqmp-clk-ccf.dtsi
+index dc881b6..5e944f0 100644
+--- a/arch/arm64/boot/dts/xilinx/zynqmp-clk-ccf.dtsi
++++ b/arch/arm64/boot/dts/xilinx/zynqmp-clk-ccf.dtsi
+@@ -9,7 +9,7 @@
+ 
+ / {
+ 	fclk0: fclk0 {
+-		status = "disabled";
++		status = "okay";
+ 		compatible = "xlnx,fclk";
+ 		clocks = <&clk 71>;
+ 	};

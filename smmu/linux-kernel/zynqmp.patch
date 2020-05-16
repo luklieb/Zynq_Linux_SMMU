@@ -1,0 +1,89 @@
+diff --git a/drivers/fpga/zynqmp-fpga.c b/drivers/fpga/zynqmp-fpga.c
+index 363d3aa..e96b5e1 100644
+--- a/drivers/fpga/zynqmp-fpga.c
++++ b/drivers/fpga/zynqmp-fpga.c
+@@ -167,6 +167,76 @@ static int zynqmp_fpga_ops_write(struct fpga_manager *mgr,
+ 	return ret;
+ }
+ 
++static int zynqmp_fpga_ops_write_sg(struct fpga_manager *mgr,
++					struct sg_table *sgt)
++{
++	struct zynqmp_fpga_priv *priv;
++	struct sg_mapping_iter miter;
++	char *kbuf;
++	size_t size = 0;
++	size_t dma_size;
++	dma_addr_t dma_addr;
++	int ret;
++	const struct zynqmp_eemi_ops *eemi_ops = zynqmp_pm_get_eemi_ops();
++
++	if (!eemi_ops || !eemi_ops->fpga_load)
++		return -ENXIO;
++
++	sg_miter_start(&miter, sgt->sgl, sgt->nents, SG_MITER_FROM_SG);
++	while(sg_miter_next(&miter))
++		size += miter.length;
++	sg_miter_stop(&miter);
++
++	dma_size = size;
++	priv = mgr->priv;
++	priv->size = size;
++
++	if (!mutex_trylock(&priv->lock))
++		return -EBUSY;
++
++	ret = clk_enable(priv->clk);
++	if (ret)
++		goto err_unlock;
++
++	if (priv->flags & IXR_FPGA_ENCRYPTION_EN)
++		dma_size += ENCRYPTED_KEY_LEN;
++	if (priv->flags & IXR_FPGA_USER_PPK_EN)
++		dma_size += PPK_HASH_LEN;
++
++	kbuf = dma_alloc_coherent(priv->dev, dma_size, &dma_addr, GFP_KERNEL);
++	if (!kbuf) {
++		ret = -ENOMEM;
++		goto disable_clk;
++	}
++
++	sg_copy_to_buffer(sgt->sgl, sgt->nents, kbuf, size);
++
++	if (priv->flags & IXR_FPGA_ENCRYPTION_EN) {
++		memcpy(kbuf + size, priv->key, ENCRYPTED_KEY_LEN);
++		if (priv->flags & IXR_FPGA_USER_PPK_EN)
++			memcpy(kbuf + size + ENCRYPTED_KEY_LEN, priv->ppkhash,
++			       PPK_HASH_LEN);
++	} else if (priv->flags & IXR_FPGA_USER_PPK_EN) {
++		memcpy(kbuf + size, priv->ppkhash, PPK_HASH_LEN);
++	}
++
++	wmb(); /* ensure all writes are done before initiate FW call */
++
++	if ((priv->flags & IXR_FPGA_ENCRYPTION_EN) ||
++	    (priv->flags & IXR_FPGA_USER_PPK_EN))
++		ret = eemi_ops->fpga_load(dma_addr, dma_addr + size,
++					  priv->flags);
++	else
++		ret = eemi_ops->fpga_load(dma_addr, size, priv->flags);
++
++	dma_free_coherent(priv->dev, dma_size, kbuf, dma_addr);
++disable_clk:
++	clk_disable(priv->clk);
++err_unlock:
++	mutex_unlock(&priv->lock);
++	return ret;
++}
++
+ static int zynqmp_fpga_ops_write_complete(struct fpga_manager *mgr,
+ 					  struct fpga_image_info *info)
+ {
+@@ -313,6 +383,7 @@ static const struct fpga_manager_ops zynqmp_fpga_ops = {
+ 	.state = zynqmp_fpga_ops_state,
+ 	.write_init = zynqmp_fpga_ops_write_init,
+ 	.write = zynqmp_fpga_ops_write,
++	.write_sg = zynqmp_fpga_ops_write_sg,
+ 	.write_complete = zynqmp_fpga_ops_write_complete,
+ 	.read = zynqmp_fpga_ops_read,
+ };
