@@ -134,6 +134,4 @@ see section above
 
 # Other
 
-wifi-password: I<3HSA12
 
-root-password: I<3HSA
