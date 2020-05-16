@@ -2,8 +2,7 @@
 1. Bram
 2. DMA
 3. Wifi (DT overlay to activate wifi access point)
-4. GPIO (only for Ultrazed board)
-5. SMMU (coming soon)
+4. SMMU 
 
 All necessary files to boot/configure each project are available in the
 respective directory. Just copy and paste them either on the boot- or root-
