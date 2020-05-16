@@ -2,8 +2,6 @@ Arbeit:
 	Latenz messen, Speicherzugriff DMA-RAM mit/ohne SMMU, mit/ohne TLB hit
 
 
-ssh -Y ak01ahez@i3login.cs.fau.de
-ssh -Y cae01
 source /opt/Xilinx/Vivado/2017.2/settings64.sh
 
 local: run hw_server
