@@ -1,0 +1,100 @@
+Arbeit:
+	Latenz messen, Speicherzugriff DMA-RAM mit/ohne SMMU, mit/ohne TLB hit
+
+
+ssh -Y ak01ahez@i3login.cs.fau.de
+ssh -Y cae01
+source /opt/Xilinx/Vivado/2017.2/settings64.sh
+
+local: run hw_server
+
+cu -l /dev/ttyUSB2 -s 115200
+
+
+TCL: set_param board.repoPaths <path>
+
+
+Device Tree:
+
+Node: clk -> changes: 	- new nodename: clkc
+			- compatible = "xlnx, zynqmp-clkc"
+			- clock-output-names = "iopll", "rpll", "apll", "dpll", "vpll", "iopll_to_fpd", "rpll_to_fpd", "apll_to_lpd", "dpll_to_lpd", "vpll_to_lpd", "acpu", "acpu_half", "dbf_fpd", "dbf_lpd", "dbg_trace", "dbg_tstmp", "dp_video_ref", "dp_audio_ref", "dp_stc_ref", "gdma_ref", "dpdma_ref", "ddr_ref", "sata_ref", "pcie_ref", "gpu_ref", "gpu_pp0_ref", "gpu_pp1_ref", "topsw_main", "topsw_lsbus", "gtgref0_ref", "lpd_switch", "lpd_lsbus", "usb0_bus_ref", "usb1_bus_ref", "usb3_dual_ref", "usb0", "usb1", "cpu_r5", "cpu_r5_core", "csu_spb", "csu_pll", "pcap", "iou_switch", "gem_tsu_ref", "gem_tsu", "gem0_ref", "gem1_ref", "gem2_ref", "gem3_ref", "gem0_tx", "gem1_tx", "gem2_tx", "gem3_tx", "qspi_ref", "sdio0_ref", "sdio1_ref", "uart0_ref", "uart1_ref", "spi0_ref", "spi1_ref", "nand_ref", "i2c0_ref", "i2c1_ref", "can0_ref", "can1_ref", "can0", "can1", "dll_ref", "adma_ref", "timestamp_ref", "ams_ref", "pl0", "pl1", "pl2", "pl3", "wdt";
+	 
+Node: sdhci1: 		- (no-1-8-v;)
+			- disable-wp;
+			- non-removable;
+			- cap-power-off-card;
+
+Node: sdhci0:		- disable-wp;
+			- broken-cd;
+			- no-1-8-v;
+
+Node: amba_pl: 		- amba_pl@0 {
+		#address-cells = <0x2>;
+		#size-cells = <0x2>;
+		compatible = "simple-bus";
+		ranges;
+	};
+
+
+Node: dwc3_0 (usb0): 	- dr_mode = "peripheral";
+			- //maximum-speed = "super-speed";
+			- //phy-names = "usb3-phy";
+			- //phys = <&lane2 0x4 0x0 0x0 0x18cba80>;
+
+Node: dwc3_1 (usb1):	- dr_mode = "host";
+			- //phy-names = "usb3-phy";
+			- //phys = <&lane3 0x4 0x1 0x0 0x18cba80>;
+			- //maximum-speed = "super-speed";
+
+Node: fclk0: 		- status=<okay>;
+
+DMA core:
+			- clock-names = "s_axi_lite_aclk", "m_axi_sg_aclk", "m_axi_mm2s_aclk", "m_axi_s2mm_aclk";
+			- interrupt-names = "mm2s_introut", "s2mm_introut";
+			- "" beachten!
+
+WIFI:			- see ./wifi/wifi.dtsi
+
+SDK Device Tree generation:
+Checkout suitable tag in device_tree_xilinx repo for vivado release/version
+file: device_tree_xlnx/axi_dma/data/axi_dma.tcl:
+proc add_dma_coherent_prop {drv_handle intf} {
+     hsi::utils::add_new_property $drv_handle "dma-coherent" boolean ""
+     return
+	...
+}
+
+
+
+Always use FSBL and PMUFW of current HW design, or else PS might not be correctly initialized -> can lead to wrong results
+
+Ultra96:
+
+	No Output over UART/serial: Everything must be configured to go trough serial@ff010000 (uart1) -> choose alias for serial0 as serial@ff010000
+	MMC/SD Error: everything must go through SDHCI@ff160000 (MMC0) -> change /etc/fstab to /dev/mmcblk0p1 for /boot
+
+	FSBL not showing: Change STDOUT/STDIN to PS_UART_1 in SDK BSP
+	FSBL not loading with JTAG (hangs at PS_INIT) and not loading from SD -> Redo Block design (or use Ultra96 BDF version 1.0)
+
+
+Kernel Panic at boot:
+	Install newest linux-{image, header}.deb packages, which were built with the current kernel
+
+JTAG Linux debugging:
+	use cpuidle.off=1 as bootarg -> bootargs=console=ttyPS0,115200 root=/dev/mmcblk0p2 rw rootwait uio_pdrv_genirq.of_id=generic-uio clk_ignore_unused cpuidle.off=1
+
+
+VFIO/SMMU hangs at execution of DMA program:
+	Most likely the PL clock was deactived when the dma device was unbound from the dma driver (and attached to the vfio driver) -> manually enable fclk0 status=<okay> in the device tree
+
+
+Cache Coherency:
+	Enable broadcast of inner sharable transactions:
+	add to boot.bif "[init]<path>\regs.init"
+	create file regs.init with content ".set. 0xFF41A040 = 0x3;"
+
+TFTP U-Boot boot:
+	Setup "atftpd" on host like this: http://processors.wiki.ti.com/index.php/Setting_Up_a_TFTP_Server
+	(alternatively link arch/arm64/boot dir to /tftpboot)
+	use new uEnv.txt for u-boot

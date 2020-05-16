@@ -1,0 +1,51 @@
+LED Ultra96 Test
+	Fehlgeschlagen, weil LEDs nicht vom PL aus erreichbar sind. Würden 
+	LED am slow speed expansion header anschließen müssen
+
+LED UltraZed Test
+	Konnte mittels mmap auf physikalische Adresse des AXI GPIO Blocks zugreifen
+	und LEDs an/ausschalten, in dem in den Speicherbereich (offset 0) ein Wert
+	geschrieben wurde
+
+BRAM Test
+	FSBL wichtig
+	mmmap: MAP_SHARED
+	open: O_SYNC|O_RDWR
+	pointer 64 bit
+	Hilfreich: Paket "memtool"
+
+DMA Test
+	PCW3 DT node im Xilinx DT unvollständig
+	SDHCI (s. oben)
+	"bare metal" program with mmap to test dma transfers
+	Aktiviert fclk0 per DT damit Programm nicht hängen bleibt (aktiviert FPGA clock, nachdem sie vom VFIO unbound abgeschalten wird)
+	Register im Bootloader gesetzt, um inner sharable transactions zu broadcasten
+	
+DMA UltraZed Test
+	Kernel newly compiled with Tracing and VFIO as module
+	vfio and smmu work together, but maybe wrong StreamID (AXI-ID?)
+
+BuildRootfs
+	Automatische Konfiguration und installation aller benötigter Pakete
+	Kopieren der wichtigsten Konfigurationen
+
+BuildBootloader
+	FSBL und PMUfirmware müssen für jedes Blockdiagramm neu erstellt werden
+	ATF, U-Boot, Kernel können für jedes Board wiederverwendet werden
+
+IOMMU
+	Eigenen Treiber (abgeleitet von VFIO subsystem)
+	ermöglicht mapping von page frames zu iova (PL Teil ruft iova auf)
+	Funktionalität für bis zu 256 Prozesse gleichzeitig
+	PIDs überschreiben jedoch obere 8 bit der iova -> nicht schön -> kann Probleme auf anderen Boards ggeben (z.B. PCIe befindet sich genau an der Adresse 8bit PID + 40bit restliches iova)
+	Linux SMMU Treiber muss angepasst werden (jedoch kein Modul -> Kompilierung des Kernels)
+	TFTPboot für u-Boot eingerichtet -> Kernel kann auf Desktop gebaut werden -> tftp zieht sich aktuelle Image vom Host (Desktop) zum u-Boot (ultra96) und startet automatisch	
+
+Allgemein
+	Fclk_mgr nicht mehr benötigt
+	Makefile zu(r/m) Übersetzung/Bauen von Boot.bin, bitstream.bit.bin, DT.dtb, DTO.dtbo
+	Makefile auf Boards zum automatischen flashen des FPGAs und DT overlay einfügen/entfernen
+	Vivado JTAG ILA Debug Verbindung jetzt auch unter Linux möglich
+	Wlan Zugriff mit WPA Key
+	WIFI DT overlay für einfachen Gebrauch erstellt
+	U-Boot kann per TFTP Kernel Image von einem Server laden (uEnv.txt Linie auskommentieren)
